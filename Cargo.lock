@@ -8,7 +8,6 @@ version = "0.1.0"
 dependencies = [
  "dialoguer",
  "env_logger",
- "log",
  "windows-service",
 ]
 
