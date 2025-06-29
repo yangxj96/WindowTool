@@ -7,7 +7,7 @@ use util::registry_util::RegistryUtil;
 use util::windows_service_util::ServiceQueryResult;
 use util::windows_service_util::WindowsServiceUtil;
 
-const DEFAULT_SERVICES: &[&str] = &["MySQL", "Redis", "PostgreSQL"];
+const DEFAULT_SERVICES: &[&str] = &["MySQL", "Redis", "PostgreSQL", "INODE_SVR_SERVICE"];
 
 fn main() -> io::Result<()> {
     env_logger::init(); // 可选日志支持
