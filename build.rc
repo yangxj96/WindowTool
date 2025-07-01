@@ -1,0 +1,30 @@
+#include <windows.h>
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0x0L
+FILEOS          VOS__WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "CompanyName", "你的公司名\0"
+            VALUE "FileDescription", "程序描述\0"
+            VALUE "FileVersion", "1.0.0.0\0"
+            VALUE "InternalName", "内部名称\0"
+            VALUE "LegalCopyright", "版权所有 (C) 2025 你的名字\0"
+            VALUE "OriginalFilename", "你的程序.exe\0"
+            VALUE "ProductName", "产品名称\0"
+            VALUE "ProductVersion", "1.0.0.0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
