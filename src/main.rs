@@ -1,5 +1,4 @@
 mod util;
-mod build;
 
 use dialoguer::{Select, theme::ColorfulTheme};
 use std::io;
