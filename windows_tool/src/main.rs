@@ -1,11 +1,11 @@
-mod util;
-
 use dialoguer::{Select, theme::ColorfulTheme};
 use std::io;
 
-use util::registry_util::RegistryUtil;
-use util::windows_service_util::ServiceQueryResult;
-use util::windows_service_util::WindowsServiceUtil;
+use windows_tool_service::service::{
+    ServiceQueryResult, query_service_status, start_service, stop_service,
+};
+
+use windows_tool_shell::probation::navicat_registry_cleanup;
 
 const DEFAULT_SERVICES: &[&str] = &["MySQL", "Redis", "PostgreSQL", "INODE_SVR_SERVICE"];
 
@@ -36,7 +36,7 @@ fn main() -> io::Result<()> {
             1 => batch_start_services(&mut services),
             2 => batch_stop_services(&mut services),
             3 => individual_service_control(&mut services),
-            4 => RegistryUtil::execute_registry_cleanup(),
+            4 => navicat_registry_cleanup(),
             5 => {
                 println!("👋 正在退出程序...");
                 break;
@@ -54,8 +54,7 @@ fn load_default_services() -> Vec<ServiceInfo> {
         .iter()
         .map(|&name| ServiceInfo {
             name: name.to_string(),
-            status: WindowsServiceUtil::query_service_status(name)
-                .unwrap_or(ServiceQueryResult::Unknown),
+            status: query_service_status(name).unwrap_or(ServiceQueryResult::Unknown),
         })
         .collect()
 }
@@ -79,10 +78,9 @@ fn display_service_status(services: &[ServiceInfo]) {
 // 一键启动所有服务
 fn batch_start_services(services: &mut Vec<ServiceInfo>) {
     println!("⏳ 正在尝试启动所有服务...");
-
     for service in services {
         if let ServiceQueryResult::Stopped = service.status {
-            if WindowsServiceUtil::start_service(&service.name) {
+            if start_service(&service.name) {
                 println!("✅ {} 启动成功", service.name);
                 service.status = ServiceQueryResult::Running;
             } else {
@@ -97,10 +95,9 @@ fn batch_start_services(services: &mut Vec<ServiceInfo>) {
 // 一键停止所有服务
 fn batch_stop_services(services: &mut Vec<ServiceInfo>) {
     println!("⏳ 正在尝试停止所有服务...");
-
     for service in services {
         if let ServiceQueryResult::Running = service.status {
-            if WindowsServiceUtil::stop_service(&service.name) {
+            if stop_service(&service.name) {
                 println!("✅ {} 停止成功", service.name);
                 service.status = ServiceQueryResult::Stopped;
             } else {
@@ -131,7 +128,7 @@ fn individual_service_control(services: &mut Vec<ServiceInfo>) {
 
     match action {
         0 => {
-            if WindowsServiceUtil::start_service(&selected.name) {
+            if start_service(&selected.name) {
                 selected.status = ServiceQueryResult::Running;
                 println!("✅ {} 启动成功", selected.name);
             } else {
@@ -139,14 +136,14 @@ fn individual_service_control(services: &mut Vec<ServiceInfo>) {
             }
         }
         1 => {
-            if WindowsServiceUtil::stop_service(&selected.name) {
+            if stop_service(&selected.name) {
                 selected.status = ServiceQueryResult::Stopped;
                 println!("✅ {} 停止成功", selected.name);
             } else {
                 eprintln!("❌ {} 停止失败", selected.name);
             }
         }
-        2 => match WindowsServiceUtil::query_service_status(&selected.name) {
+        2 => match query_service_status(&selected.name) {
             Ok(status) => {
                 selected.status = status.clone();
                 let status_str = match status {

@@ -1,0 +1,32 @@
+[package]
+name = "windows_tool"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+build = "build.rs"
+
+[lints]
+workspace = true
+
+# windows下打包才添加这个carte
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.12"
+
+# 包的元数据,对winres来说有用,打包后在exe属性的详情中可以看到
+[package.metadata.winres]
+OriginalFilename = "WindowTool.exe"
+LegalCopyright = "Copyright © 2025 Yangxj96"
+FileDescription = "这是一个windows下的小工具,个人使用"
+FileVersion = "2025.7.1.0"
+ProductName = "小工具"
+ProductVersion = "2025.7.1.0"
+
+[dependencies]
+# 自己的模块
+windows_tool_service.workspace = true
+windows_tool_shell.workspace = true
+# 外部模块
+dialoguer.workspace = true
+env_logger.workspace = true
