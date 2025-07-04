@@ -1,5 +1,5 @@
 [workspace]
-members = ["windows_tool", "crates/service", "crates/shell"]
+members = ["core", "crates/service", "crates/shell"]
 resolver = "2"
 
 [workspace.package]

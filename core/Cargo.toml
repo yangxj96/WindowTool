@@ -10,6 +10,10 @@ build = "build.rs"
 [lints]
 workspace = true
 
+[[bin]]
+name = "WindowTool"
+path = "src/main.rs"
+
 # windows下打包才添加这个carte
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1.12"
