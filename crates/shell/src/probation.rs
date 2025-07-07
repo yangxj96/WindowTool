@@ -3,7 +3,11 @@ use crate::shell::{run_command_and_capture_output, run_silent_command};
 /// 列出指定注册表路径下的所有子项
 fn list_registry_keys(path: &str) -> Result<Vec<String>, String> {
     let output = run_command_and_capture_output("reg", &["query", path])?;
-    Ok(output.lines().filter(|line| line.starts_with("HKEY_")).map(|s| s.to_string()).collect())
+    Ok(output
+        .lines()
+        .filter(|line| line.starts_with("HKEY_"))
+        .map(|s| s.to_string())
+        .collect())
 }
 
 /// 检查注册表项是否包含某个字符串

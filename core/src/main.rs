@@ -69,7 +69,8 @@ fn load_default_services() -> Vec<ServiceInfo> {
         .map(|s| ServiceInfo {
             // name: s.name.clone(),
             inner: s.clone(),
-            status: service::query_service_status(&s.name).unwrap_or(service::ServiceQueryResult::Unknown),
+            status: service::query_service_status(&s.name)
+                .unwrap_or(service::ServiceQueryResult::Unknown),
         })
         .collect()
 }
@@ -131,13 +132,19 @@ fn batch_stop_services(services: &mut Vec<ServiceInfo>) {
 // 单独控制某个服务
 fn individual_service_control(services: &mut Vec<ServiceInfo>) {
     let names: Vec<String> = services.iter().map(|s| s.name.clone()).collect();
-    let selection =
-        Select::with_theme(&ColorfulTheme::default()).items(&names).default(0).interact().expect("无法选择服务");
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .items(&names)
+        .default(0)
+        .interact()
+        .expect("无法选择服务");
 
     let selected = &mut services[selection];
     let actions = &["🟢 启动服务", "🔴 停止服务", "🔄 查询状态"];
-    let action =
-        Select::with_theme(&ColorfulTheme::default()).items(actions).default(0).interact().expect("无法选择操作");
+    let action = Select::with_theme(&ColorfulTheme::default())
+        .items(actions)
+        .default(0)
+        .interact()
+        .expect("无法选择操作");
 
     match action {
         0 => {

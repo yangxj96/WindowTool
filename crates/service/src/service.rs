@@ -22,7 +22,9 @@ pub fn query_service_status(service_name: &str) -> Result<ServiceQueryResult, St
         .open_service(service_name, ServiceAccess::QUERY_STATUS)
         .map_err(|e| format!("无法打开服务 {}: {:?}", service_name, e))?;
 
-    let status = service.query_status().map_err(|e| format!("查询服务 {} 状态失败: {:?}", service_name, e))?;
+    let status = service
+        .query_status()
+        .map_err(|e| format!("查询服务 {} 状态失败: {:?}", service_name, e))?;
 
     Ok(match status.current_state {
         ServiceState::Running => ServiceQueryResult::Running,
@@ -49,7 +51,8 @@ pub fn start_service(service_name: &str) -> bool {
                 eprintln!("启动服务 {} 失败: {:?}", service_name, e);
                 false
             } else {
-                wait_for_service_state(service_name, ServiceState::Running, Duration::from_secs(10)).is_ok()
+                wait_for_service_state(service_name, ServiceState::Running, Duration::from_secs(10))
+                    .is_ok()
             }
         }
         Err(e) => {
@@ -76,7 +79,8 @@ pub fn stop_service(service_name: &str) -> bool {
             }
 
             // 等待服务完全停止
-            wait_for_service_state(service_name, ServiceState::Stopped, Duration::from_secs(10)).is_ok()
+            wait_for_service_state(service_name, ServiceState::Stopped, Duration::from_secs(10))
+                .is_ok()
         }
         Err(e) => {
             eprintln!("{}", e);
@@ -86,15 +90,24 @@ pub fn stop_service(service_name: &str) -> bool {
 }
 
 /// 获取服务句柄
-fn with_service_handle(service_name: &str, access: ServiceAccess) -> Result<windows_service::service::Service, String> {
+fn with_service_handle(
+    service_name: &str,
+    access: ServiceAccess,
+) -> Result<windows_service::service::Service, String> {
     let manager = ServiceManager::local_computer(None::<&str>, ServiceManagerAccess::CONNECT)
         .map_err(|e| format!("无法连接服务管理器:{:?}", e))?;
 
-    manager.open_service(service_name, access).map_err(|e| format!("无法打开服务{}:{:?}", service_name, e))
+    manager
+        .open_service(service_name, access)
+        .map_err(|e| format!("无法打开服务{}:{:?}", service_name, e))
 }
 
 /// 等待服务进入句柄
-fn wait_for_service_state(service_name: &str, target_state: ServiceState, timeout: Duration) -> Result<(), String> {
+fn wait_for_service_state(
+    service_name: &str,
+    target_state: ServiceState,
+    timeout: Duration,
+) -> Result<(), String> {
     let start_time = std::time::Instant::now();
     while start_time.elapsed() < timeout {
         match query_service_status(service_name) {
@@ -108,5 +121,8 @@ fn wait_for_service_state(service_name: &str, target_state: ServiceState, timeou
         }
     }
 
-    Err(format!("等待服务 '{}' 进入状态 {:?} 超时", service_name, target_state))
+    Err(format!(
+        "等待服务 '{}' 进入状态 {:?} 超时",
+        service_name, target_state
+    ))
 }

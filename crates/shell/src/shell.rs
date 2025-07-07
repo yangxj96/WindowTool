@@ -25,7 +25,12 @@ pub fn run_command_and_capture_output(command: &str, args: &[&str]) -> Result<St
 
 /// 静默执行命令（不显示输出）
 pub fn run_silent_command(command: &str, args: &[&str]) {
-    if let Err(e) = Command::new(command).args(args).stdout(Stdio::null()).stderr(Stdio::null()).spawn() {
+    if let Err(e) = Command::new(command)
+        .args(args)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+    {
         eprintln!("静默执行命令失败: {}: {:?}", command, e);
     }
 }
