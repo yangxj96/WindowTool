@@ -1,13 +1,33 @@
 use dialoguer::{Select, theme::ColorfulTheme};
-use std::io;
+use std::{io, ops::Deref};
 
+use windows_tool_config::config;
 use windows_tool_service::service::{
     ServiceQueryResult, query_service_status, start_service, stop_service,
 };
-
 use windows_tool_shell::probation::navicat_registry_cleanup;
 
-const DEFAULT_SERVICES: &[&str] = &["MySQL", "Redis", "PostgreSQL", "INODE_SVR_SERVICE"];
+// 内存中的服务信息
+// #[derive(Clone)]
+// struct ServiceInfo {
+//     name: String,
+//     status: ServiceQueryResult,
+// }
+
+#[derive(Clone, Debug)]
+struct ServiceInfo {
+    inner: config::Service,
+    status: ServiceQueryResult,
+}
+
+/// 扩展
+impl Deref for ServiceInfo {
+    type Target = config::Service;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
 
 fn main() -> io::Result<()> {
     env_logger::init(); // 可选日志支持
@@ -50,11 +70,13 @@ fn main() -> io::Result<()> {
 
 // 加载默认服务及其初始状态
 fn load_default_services() -> Vec<ServiceInfo> {
-    DEFAULT_SERVICES
-        .iter()
-        .map(|&name| ServiceInfo {
-            name: name.to_string(),
-            status: query_service_status(name).unwrap_or(ServiceQueryResult::Unknown),
+    let services = config::get_services();
+    services
+        .into_iter()
+        .map(|s| ServiceInfo {
+            // name: s.name.clone(),
+            inner: s.clone(),
+            status: query_service_status(&s.name).unwrap_or(ServiceQueryResult::Unknown),
         })
         .collect()
 }
@@ -79,15 +101,18 @@ fn display_service_status(services: &[ServiceInfo]) {
 fn batch_start_services(services: &mut Vec<ServiceInfo>) {
     println!("⏳ 正在尝试启动所有服务...");
     for service in services {
-        if let ServiceQueryResult::Stopped = service.status {
+        // 只处理 unify 为 true 的服务，并且当前状态是已停止
+        if service.unify && matches!(service.status, ServiceQueryResult::Stopped) {
             if start_service(&service.name) {
                 println!("✅ {} 启动成功", service.name);
                 service.status = ServiceQueryResult::Running;
             } else {
                 eprintln!("❌ {} 启动失败", service.name);
             }
+        } else if !service.unify {
+            println!("⏩ {} 被标记为不统一管理，跳过", service.name);
         } else {
-            println!("⏩ {} 已运行，跳过", service.name);
+            println!("⏩ {} 已运行或启动中，跳过", service.name);
         }
     }
 }
@@ -96,13 +121,15 @@ fn batch_start_services(services: &mut Vec<ServiceInfo>) {
 fn batch_stop_services(services: &mut Vec<ServiceInfo>) {
     println!("⏳ 正在尝试停止所有服务...");
     for service in services {
-        if let ServiceQueryResult::Running = service.status {
+        if service.unify && matches!(service.status, ServiceQueryResult::Running) {
             if stop_service(&service.name) {
                 println!("✅ {} 停止成功", service.name);
                 service.status = ServiceQueryResult::Stopped;
             } else {
                 eprintln!("❌ {} 停止失败", service.name);
             }
+        } else if !service.unify {
+            println!("⏩ {} 被标记为不统一管理，跳过", service.name);
         } else {
             println!("⏩ {} 已停止，跳过", service.name);
         }
@@ -160,11 +187,4 @@ fn individual_service_control(services: &mut Vec<ServiceInfo>) {
         },
         _ => unreachable!(),
     }
-}
-
-// 内存中的服务信息
-#[derive(Clone)]
-struct ServiceInfo {
-    name: String,
-    status: ServiceQueryResult,
 }

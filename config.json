@@ -1,0 +1,20 @@
+{
+  "servers": [
+    {
+      "name": "MySQL",
+      "unify": true
+    },
+    {
+      "name": "Redis",
+      "unify": true
+    },
+    {
+      "name": "PostgreSQL",
+      "unify": false
+    },
+    {
+      "name": "INODE_SVR_SERVICE",
+      "unify": false
+    }
+  ]
+}
