@@ -1,0 +1,49 @@
+edition = "2021"
+
+# 缩进风格为块状（Block），类似 IntelliJ 风格
+indent_style = "Block"
+
+# 函数参数布局：Tall 表示每个参数一行，如果空间允许
+fn_args_layout = "Tall"
+
+# 匿名函数返回类型提示
+closure_return_type = "Always"
+
+# 大括号风格：总是换行
+brace_style = "AlwaysNextLine"
+struct_lit_brace_style = "AlwaysNextLine"
+
+# 枚举判别式缩进对齐标签
+enum_discriminant_indent = "AlignWithEnumTag"
+
+# 数组/元组结构体自动换行
+array_layout = "Block"
+tuple_struct_layout = "Block"
+
+# where 子句缩进风格
+where_clause_indent = "SameAsHead"
+where_predicate_indent = "Indented"
+
+# 控制流语句如 if/else 括号风格
+control_brace_style = "AlwaysNextLine"
+
+# 宏括号风格
+macro_braces = "SameLineWherePossible"
+
+# 对齐属性与字段
+struct_lit_align_attrs = true
+
+# 自动换行宽度设置
+max_width = 120
+use_small_heuristics = "Off"
+
+# 导入排序（reorder_imports 是支持的）
+reorder_imports = true
+
+# 注释保留策略
+normalize_comments = true
+wrap_comments = true
+
+# 报告 todo! 和未使用的变量为警告
+report_todo = "Warn"
+report_unused_variables = "Warn"

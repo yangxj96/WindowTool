@@ -1,23 +1,15 @@
 use dialoguer::{Select, theme::ColorfulTheme};
 use std::{io, ops::Deref};
-
+// 自己写的crate模块
 use windows_tool_config::config;
-use windows_tool_service::service::{
-    ServiceQueryResult, query_service_status, start_service, stop_service,
-};
-use windows_tool_shell::probation::navicat_registry_cleanup;
+use windows_tool_service::service;
+use windows_tool_shell::probation;
 
-// 内存中的服务信息
-// #[derive(Clone)]
-// struct ServiceInfo {
-//     name: String,
-//     status: ServiceQueryResult,
-// }
-
+/// 服务信息,扩展config::Service中的内容
 #[derive(Clone, Debug)]
 struct ServiceInfo {
     inner: config::Service,
-    status: ServiceQueryResult,
+    status: service::ServiceQueryResult,
 }
 
 /// 扩展
@@ -30,7 +22,8 @@ impl Deref for ServiceInfo {
 }
 
 fn main() -> io::Result<()> {
-    env_logger::init(); // 可选日志支持
+    // 可选日志支持
+    env_logger::init();
 
     println!("🔧 欢迎使用小工具");
     let mut services = load_default_services();
@@ -56,7 +49,7 @@ fn main() -> io::Result<()> {
             1 => batch_start_services(&mut services),
             2 => batch_stop_services(&mut services),
             3 => individual_service_control(&mut services),
-            4 => navicat_registry_cleanup(),
+            4 => probation::navicat_registry_cleanup(),
             5 => {
                 println!("👋 正在退出程序...");
                 break;
@@ -76,7 +69,7 @@ fn load_default_services() -> Vec<ServiceInfo> {
         .map(|s| ServiceInfo {
             // name: s.name.clone(),
             inner: s.clone(),
-            status: query_service_status(&s.name).unwrap_or(ServiceQueryResult::Unknown),
+            status: service::query_service_status(&s.name).unwrap_or(service::ServiceQueryResult::Unknown),
         })
         .collect()
 }
@@ -86,12 +79,12 @@ fn display_service_status(services: &[ServiceInfo]) {
     println!("\n📋 当前服务状态：");
     for service in services {
         let status_str = match service.status {
-            ServiceQueryResult::Running => "🟢 运行中",
-            ServiceQueryResult::Stopped => "🔴 已停止",
-            ServiceQueryResult::Starting => "🔄 启动中",
-            ServiceQueryResult::Stopping => "🔄 停止中",
-            ServiceQueryResult::Paused => "⏸ 暂停",
-            ServiceQueryResult::Unknown => "❓ 未知状态",
+            service::ServiceQueryResult::Running => "🟢 运行中",
+            service::ServiceQueryResult::Stopped => "🔴 已停止",
+            service::ServiceQueryResult::Starting => "🔄 启动中",
+            service::ServiceQueryResult::Stopping => "🔄 停止中",
+            service::ServiceQueryResult::Paused => "⏸ 暂停",
+            service::ServiceQueryResult::Unknown => "❓ 未知状态",
         };
         println!(" - {}: {}", service.name, status_str);
     }
@@ -101,11 +94,10 @@ fn display_service_status(services: &[ServiceInfo]) {
 fn batch_start_services(services: &mut Vec<ServiceInfo>) {
     println!("⏳ 正在尝试启动所有服务...");
     for service in services {
-        // 只处理 unify 为 true 的服务，并且当前状态是已停止
-        if service.unify && matches!(service.status, ServiceQueryResult::Stopped) {
-            if start_service(&service.name) {
+        if service.unify && matches!(service.status, service::ServiceQueryResult::Stopped) {
+            if service::start_service(&service.name) {
                 println!("✅ {} 启动成功", service.name);
-                service.status = ServiceQueryResult::Running;
+                service.status = service::ServiceQueryResult::Running;
             } else {
                 eprintln!("❌ {} 启动失败", service.name);
             }
@@ -121,10 +113,10 @@ fn batch_start_services(services: &mut Vec<ServiceInfo>) {
 fn batch_stop_services(services: &mut Vec<ServiceInfo>) {
     println!("⏳ 正在尝试停止所有服务...");
     for service in services {
-        if service.unify && matches!(service.status, ServiceQueryResult::Running) {
-            if stop_service(&service.name) {
+        if service.unify && matches!(service.status, service::ServiceQueryResult::Running) {
+            if service::stop_service(&service.name) {
                 println!("✅ {} 停止成功", service.name);
-                service.status = ServiceQueryResult::Stopped;
+                service.status = service::ServiceQueryResult::Stopped;
             } else {
                 eprintln!("❌ {} 停止失败", service.name);
             }
@@ -139,47 +131,41 @@ fn batch_stop_services(services: &mut Vec<ServiceInfo>) {
 // 单独控制某个服务
 fn individual_service_control(services: &mut Vec<ServiceInfo>) {
     let names: Vec<String> = services.iter().map(|s| s.name.clone()).collect();
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .items(&names)
-        .default(0)
-        .interact()
-        .expect("无法选择服务");
+    let selection =
+        Select::with_theme(&ColorfulTheme::default()).items(&names).default(0).interact().expect("无法选择服务");
 
     let selected = &mut services[selection];
     let actions = &["🟢 启动服务", "🔴 停止服务", "🔄 查询状态"];
-    let action = Select::with_theme(&ColorfulTheme::default())
-        .items(actions)
-        .default(0)
-        .interact()
-        .expect("无法选择操作");
+    let action =
+        Select::with_theme(&ColorfulTheme::default()).items(actions).default(0).interact().expect("无法选择操作");
 
     match action {
         0 => {
-            if start_service(&selected.name) {
-                selected.status = ServiceQueryResult::Running;
+            if service::start_service(&selected.name) {
+                selected.status = service::ServiceQueryResult::Running;
                 println!("✅ {} 启动成功", selected.name);
             } else {
                 eprintln!("❌ {} 启动失败", selected.name);
             }
         }
         1 => {
-            if stop_service(&selected.name) {
-                selected.status = ServiceQueryResult::Stopped;
+            if service::stop_service(&selected.name) {
+                selected.status = service::ServiceQueryResult::Stopped;
                 println!("✅ {} 停止成功", selected.name);
             } else {
                 eprintln!("❌ {} 停止失败", selected.name);
             }
         }
-        2 => match query_service_status(&selected.name) {
+        2 => match service::query_service_status(&selected.name) {
             Ok(status) => {
                 selected.status = status.clone();
                 let status_str = match status {
-                    ServiceQueryResult::Running => "🟢 运行中",
-                    ServiceQueryResult::Stopped => "🔴 已停止",
-                    ServiceQueryResult::Starting => "🔄 启动中",
-                    ServiceQueryResult::Stopping => "🔄 停止中",
-                    ServiceQueryResult::Paused => "⏸ 暂停",
-                    ServiceQueryResult::Unknown => "❓ 未知状态",
+                    service::ServiceQueryResult::Running => "🟢 运行中",
+                    service::ServiceQueryResult::Stopped => "🔴 已停止",
+                    service::ServiceQueryResult::Starting => "🔄 启动中",
+                    service::ServiceQueryResult::Stopping => "🔄 停止中",
+                    service::ServiceQueryResult::Paused => "⏸ 暂停",
+                    service::ServiceQueryResult::Unknown => "❓ 未知状态",
                 };
                 println!("🔍 {} 当前状态: {}", selected.name, status_str);
             }
