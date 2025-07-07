@@ -67,7 +67,6 @@ fn load_default_services() -> Vec<ServiceInfo> {
     services
         .into_iter()
         .map(|s| ServiceInfo {
-            // name: s.name.clone(),
             inner: s.clone(),
             status: service::query_service_status(&s.name)
                 .unwrap_or(service::ServiceQueryResult::Unknown),
