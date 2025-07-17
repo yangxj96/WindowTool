@@ -136,19 +136,6 @@ fn display_service_status(services: &[ServiceInfo]) {
 
     // 强制刷新输出缓冲区，确保立即显示
     stdout().flush().unwrap();
-
-    // println!("\n📋 当前服务状态：");
-    // for service in services {
-    //     let status_str = match service.status {
-    //         service::ServiceQueryResult::Running => "🟢 运行中",
-    //         service::ServiceQueryResult::Stopped => "🔴 已停止",
-    //         service::ServiceQueryResult::Starting => "🔄 启动中",
-    //         service::ServiceQueryResult::Stopping => "🔄 停止中",
-    //         service::ServiceQueryResult::Paused => "⏸ 暂停",
-    //         service::ServiceQueryResult::Unknown => "❓ 未知状态",
-    //     };
-    //     println!(" - {}: {}", service.name, status_str);
-    // }
 }
 
 // 一键启动所有服务
