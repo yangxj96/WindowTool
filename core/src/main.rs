@@ -31,7 +31,7 @@ fn main() -> io::Result<()> {
     let jdk_path = load_current_jdk();
     let mut services = load_default_services();
 
-    print!("🔧 欢迎使用小工具");
+    println!("🔧 欢迎使用小工具");
 
     loop {
         let options = &[
