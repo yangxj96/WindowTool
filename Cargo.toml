@@ -1,5 +1,11 @@
 [workspace]
-members = ["core", "crates/config", "crates/service", "crates/shell"]
+members = [
+    "core",
+    "crates/config",
+    "crates/service",
+    "crates/shell",
+    "crates/jdk_manager",
+]
 resolver = "2"
 
 [workspace.package]
@@ -20,9 +26,18 @@ all = "warn"
 windows_tool_service = { path = "crates/service", version = "0.0.1" }
 windows_tool_shell = { path = "crates/shell", version = "0.0.1" }
 windows_tool_config = { path = "crates/config", version = "0.0.1" }
+windows_tool_jdk_manager = { path = "crates/jdk_manager", version = "0.0.1" }
 # 外部依赖管理
 windows-service = "0.8.0"
 dialoguer = "0.11"
 env_logger = "0.11.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.140"
+# 遍历目录
+walkdir = "2.4.0"
+# 获取系统路径,比如AppData
+dirs = "6.0.0"
+# 注册表操作
+winreg = "0.55.0"
+winapi = "0.3"
+console = "0.16.0"

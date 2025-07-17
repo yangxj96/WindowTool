@@ -4,7 +4,8 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 struct Config {
-    servers: Vec<Service>,
+    pub jdk_path: String,
+    pub servers: Vec<Service>,
 }
 
 /// 服务状态枚举
@@ -28,4 +29,12 @@ pub fn get_services() -> Vec<Service> {
     let connect = read_json_file();
     let config: Config = serde_json::from_str(&connect).expect("无法解析JSON文件");
     config.servers
+}
+
+
+/// 获取JDK路径
+pub fn get_jdk_path() -> String {
+    let connect = read_json_file();
+    let config: Config = serde_json::from_str(&connect).expect("无法解析JSON文件");
+    config.jdk_path
 }

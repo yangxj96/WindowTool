@@ -32,6 +32,8 @@ ProductVersion = "2025.7.1.0"
 windows_tool_service.workspace = true
 windows_tool_shell.workspace = true
 windows_tool_config.workspace = true
+windows_tool_jdk_manager.workspace = true
 # 外部模块
 dialoguer.workspace = true
 env_logger.workspace = true
+console.workspace = true
