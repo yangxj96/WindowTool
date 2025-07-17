@@ -27,10 +27,11 @@ impl Deref for ServiceInfo {
 fn main() -> io::Result<()> {
     // 可选日志支持
     env_logger::init();
-
-    print!("🔧 欢迎使用小工具");
+    
     let jdk_path = load_current_jdk();
     let mut services = load_default_services();
+
+    print!("🔧 欢迎使用小工具");
 
     loop {
         let options = &[
