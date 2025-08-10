@@ -7,6 +7,6 @@ fn main() {
         let res = winres::WindowsResource::new();
         res.compile().unwrap();
     } else {
-        println!("当前操作系统不是 Windows，跳过资源编译。");
+        println!("当前操作系统不是windows,跳过资源编译.");
     }
 }
