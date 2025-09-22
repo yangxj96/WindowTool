@@ -1,0 +1,125 @@
+# ========================
+# CLion (JetBrains C/C++ IDE)
+# ========================
+# Generated files
+cmake-build-*/
+*.cmake
+CMakeCache.txt
+CMakeFiles/
+CPackConfig.cmake
+CPackSourceConfig.cmake
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+Makefile
+build/
+
+# CLion files
+*.iws
+*.ipr
+*.iml
+.cltasks
+.idea/
+*.suo
+*.user
+*.useros
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+# ========================
+# Qt Build & Compiler
+# ========================
+# Qt Creator files
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+
+# Qt generated files
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+ui_*.cpp
+qrc_*.cxx
+moc_*.cxx
+*.moc
+*.moc.cpp
+
+# Qt temporary files
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+*.exe
+*.out
+*.app
+*.plist
+
+# ========================
+# C++ Build Artifacts
+# ========================
+# Output binaries
+bin/
+obj/
+dist/
+out/
+*_test
+*_unittest
+
+# Debug/Release builds
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
+debug/
+release/
+
+# ========================
+# Temporary & OS Files
+# ========================
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# Package manager
+/package-lock.json
+/yarn.lock
+/npm-shrinkwrap.json
+
+# ========================
+# Optional: Ignore specific Qt directories
+# ========================
+# If you use Qt from system or prebuilt (not in repo)
+# Uncomment if you don't want to version Qt binaries
+#Qt/
+#qt_build/
+
+# ========================
+# Do NOT ignore source code!
+# ========================
+# Make sure to keep:
+#   *.cpp
+#   *.h
+#   *.hpp
+#   *.ui (Qt Designer)
+#   *.qrc (Qt Resource)
+#   CMakeLists.txt
+#   *.pro (if used)

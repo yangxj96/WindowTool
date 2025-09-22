@@ -1,12 +1,18 @@
 cmake_minimum_required(VERSION 4.0)
 project(WinTool)
 
+# 尝试加载本地配置
+if(EXISTS ${CMAKE_SOURCE_DIR}/config.local.cmake)
+    include(${CMAKE_SOURCE_DIR}/config.local.cmake)
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(CMAKE_PREFIX_PATH "D:/Develop/Platform/Qt/6.9.2/mingw_64")
+# 放到config.local.cmake文件中了
+#set(CMAKE_PREFIX_PATH "D:/Develop/Platform/Qt/6.9.2/mingw_64")
 
 find_package(Qt6 COMPONENTS
         Core
