@@ -1,5 +1,6 @@
 add_library(ui_service SHARED
         ServiceWidget.cpp ServiceWidget.h
+        ServiceInfo.h
 )
 
 target_include_directories(ui_service PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

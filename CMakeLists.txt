@@ -17,6 +17,7 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
 
 # 添加子模块（确保它们定义了目标）
+add_subdirectory(lib/helper)
 add_subdirectory(lib/ui_jdks)
 add_subdirectory(lib/ui_service)
 add_subdirectory(src)
@@ -26,7 +27,7 @@ add_subdirectory(src)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # 定义模块
-set(PROJECT_MODULES ui_service ui_jdks)
+set(PROJECT_MODULES helper ui_service ui_jdks)
 
 # 链接库（Qt:: 前缀自动处理）
 target_link_libraries(${PROJECT_NAME}

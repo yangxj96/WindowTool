@@ -49,6 +49,14 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     # 复制自定义模块 DLL
     add_custom_command(TARGET WinTool POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
+            $<TARGET_FILE:helper>
+            "$<TARGET_FILE_DIR:WinTool>/"
+            COMMENT "Copying helper.dll..."
+    )
+
+    # 复制自定义模块 DLL
+    add_custom_command(TARGET WinTool POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
             $<TARGET_FILE:ui_service>
             "$<TARGET_FILE_DIR:WinTool>/"
             COMMENT "Copying ui_service.dll..."

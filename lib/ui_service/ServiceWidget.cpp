@@ -3,8 +3,17 @@
 #include <QMessageBox>
 #include <QMenu>
 
+#include "ServiceInfo.h"
+
 ServiceWidget::ServiceWidget(QWidget* parent) : QWidget(parent), ui(new Ui::ServiceWidget) {
     ui->setupUi(this);
+    // 写入配置
+    QList<ServiceInfo> service_infos = {
+        {"张三", 12},
+        {"李四", 30},
+        {"王五", 28}
+    };
+
     this->initUi();
     // 填充数据
     this->setTableData();
