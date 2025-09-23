@@ -26,14 +26,17 @@ private:
     // 初始化UI内容
     void initUi() const;
 
+    // 设置table的数据
+    void setTableData() const;
+
 private slots:
     void on_btn_auto_start_clicked();
 
     void on_btn_auto_stop_clicked();
 
-    void on_btn_checked_start_clicked();
+    // table相关槽
 
-    void on_btn_checked_stop_clicked();
+    void on_tb_services_customContextMenuRequested(const QPoint &pos) const;
 };
 
 

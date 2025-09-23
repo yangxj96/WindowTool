@@ -46,34 +46,24 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
     endforeach (QT_LIB)
 
-    # 复制我们自己的模块到指定位置
-    foreach(MODULE ${PROJECT_MODULES})
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:${MODULE}>
-                $<TARGET_FILE_DIR:${PROJECT_NAME}>/
-                COMMENT "Copying ${MODULE}.dll to output directory"
-                VERBATIM
-        )
-    endforeach()
+    # 复制自定义模块 DLL
+    add_custom_command(TARGET WinTool POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            $<TARGET_FILE:ui_service>
+            "$<TARGET_FILE_DIR:WinTool>/"
+            COMMENT "Copying ui_service.dll..."
+    )
 
-#    # 复制自定义模块 DLL
-#    add_custom_command(TARGET WinTool POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E copy
-#            $<TARGET_FILE:ui_service>
-#            "$<TARGET_FILE_DIR:WinTool>/"
-#            COMMENT "Copying ui_service.dll..."
-#    )
-#
-#    # 复制自定义模块 DLL
-#    add_custom_command(TARGET WinTool POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E copy
-#            $<TARGET_FILE:ui_jdks>
-#            "$<TARGET_FILE_DIR:WinTool>/"
-#            COMMENT "Copying ui_jdks.dll..."
-#    )
+    # 复制自定义模块 DLL
+    add_custom_command(TARGET WinTool POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            $<TARGET_FILE:ui_jdks>
+            "$<TARGET_FILE_DIR:WinTool>/"
+            COMMENT "Copying ui_jdks.dll..."
+    )
 
 endif ()
+
 
 # 安装主程序
 install(TARGETS WinTool RUNTIME DESTINATION .)
