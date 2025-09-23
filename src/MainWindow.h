@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "ServiceWidget.h"
+#include "JdksWidget.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -24,7 +25,8 @@ public:
 private:
     Ui::MainWindow* ui;
 
-    ServiceWidget *service_widget;
+    ServiceWidget* widget_service;
+    JdksWidget* widget_jdks;
 };
 
 

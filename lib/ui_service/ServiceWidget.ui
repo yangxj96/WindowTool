@@ -13,49 +13,43 @@
   <property name="windowTitle">
    <string>ServiceWidget</string>
   </property>
-  <widget class="QWidget" name="">
-   <property name="geometry">
-    <rect>
-     <x>22</x>
-     <y>3</y>
-     <width>320</width>
-     <height>223</height>
-    </rect>
-   </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QPushButton" name="btn_auto_start">
-      <property name="text">
-       <string>一键启动</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QPushButton" name="btn_auto_stop">
-      <property name="text">
-       <string>一键停止</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="2">
-     <widget class="QPushButton" name="btn_checked_start">
-      <property name="text">
-       <string>选中启动</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3">
-     <widget class="QPushButton" name="btn_checked_stop">
-      <property name="text">
-       <string>选中停止</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" colspan="4">
-     <widget class="QTableWidget" name="tb_services"/>
-    </item>
-   </layout>
-  </widget>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="btn_auto_start">
+       <property name="text">
+        <string>一键启动</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="btn_auto_stop">
+       <property name="text">
+        <string>一键停止</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="btn_checked_start">
+       <property name="text">
+        <string>选中启动</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QPushButton" name="btn_checked_stop">
+       <property name="text">
+        <string>选中停止</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="4">
+      <widget class="QTableWidget" name="tb_services"/>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
