@@ -1,8 +1,4 @@
-//
-// Created by admin on 2025/9/23.
-//
-
-#include "ConfigManager.h"
+#include "../../include/WinTool/helper/ConfigManager.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QJsonDocument>

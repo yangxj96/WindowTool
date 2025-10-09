@@ -1,4 +1,4 @@
-#include "ServiceWidget.h"
+#include "../../include/WinTool/ui/ServiceWidget.h"
 #include "ui_ServiceWidget.h"
 #include <QMessageBox>
 #include <QMenu>

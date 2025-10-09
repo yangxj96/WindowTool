@@ -2,8 +2,8 @@
 #include <QStyleFactory.h>
 #include <QDebug>
 
-#include "MainWindow.h"
-#include "ConfigManager.h"
+#include "WinTool/helper/ConfigManager.h"
+#include "WinTool/ui/MainWindow.h"
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);

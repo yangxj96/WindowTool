@@ -14,31 +14,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 # 查找Qt6
-find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Network REQUIRED)
 
-# 添加子模块（确保它们定义了目标）
-add_subdirectory(lib/helper)
-add_subdirectory(lib/ui_jdks)
-add_subdirectory(lib/ui_service)
+include_directories(include)
+
 add_subdirectory(src)
-
-# 配置输出目录
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-
-# 定义模块
-set(PROJECT_MODULES helper ui_service ui_jdks)
-
-# 链接库（Qt:: 前缀自动处理）
-target_link_libraries(${PROJECT_NAME}
-        Qt::Core
-        Qt::Gui
-        Qt::Widgets
-        ${PROJECT_MODULES}
-)
-
-# 将模块头文件包含进来，供 main.cpp 使用
-#target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_MODULES})
 
 # 补全相关文件
 if (WIN32 AND EXISTS "${CMAKE_PREFIX_PATH}/bin/windeployqt.exe")

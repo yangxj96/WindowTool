@@ -6,10 +6,7 @@
 #define WINTOOL_CONFIG_MANAGER_H
 
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QString>
-#include <QFile>
-
 
 class ConfigManager {
 public:
