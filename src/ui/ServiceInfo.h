@@ -1,7 +1,3 @@
-//
-// Created by admin on 2025/9/23.
-//
-
 #ifndef WINTOOL_SERVICE_INFO_H
 #define WINTOOL_SERVICE_INFO_H
 

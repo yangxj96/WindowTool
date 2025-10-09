@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 
-#include "ServiceWidget.h"
-#include "JdksWidget.h"
+#include "service_widget.h"
+#include "jdks_widget.h"
 
 QT_BEGIN_NAMESPACE
 

@@ -3,7 +3,7 @@
 #include <QDebug>
 
 #include "WinTool/helper/ConfigManager.h"
-#include "WinTool/ui/MainWindow.h"
+#include "WinTool/ui/main_window.h"
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);

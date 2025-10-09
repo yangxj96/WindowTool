@@ -1,5 +1,5 @@
-#include "../../include/WinTool/ui/ServiceWidget.h"
-#include "ui_ServiceWidget.h"
+#include "WinTool/ui/service_widget.h"
+#include "ui_service_widget.h"
 #include <QMessageBox>
 #include <QMenu>
 

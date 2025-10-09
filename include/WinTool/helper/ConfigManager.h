@@ -1,7 +1,3 @@
-//
-// Created by admin on 2025/9/23.
-//
-
 #ifndef WINTOOL_CONFIG_MANAGER_H
 #define WINTOOL_CONFIG_MANAGER_H
 
