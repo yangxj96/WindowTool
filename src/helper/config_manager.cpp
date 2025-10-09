@@ -1,4 +1,4 @@
-#include "WinTool/helper/ConfigManager.h"
+#include "WinTool/helper/config_manager.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QJsonDocument>

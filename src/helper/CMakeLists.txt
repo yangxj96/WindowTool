@@ -1,7 +1,7 @@
 add_library(helper SHARED
         # 主页
-        ../../include/WinTool/helper/ConfigManager.h
-        ConfigManager.cpp
+        ../../include/WinTool/helper/config_manager.h
+        config_manager.cpp
 )
 
 target_include_directories(helper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
