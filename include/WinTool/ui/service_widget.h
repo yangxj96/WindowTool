@@ -3,6 +3,12 @@
 
 #include <QWidget>
 
+#include "WinTool/helper/config_manager.h"
+#include "WinTool/helper/service_helper.h"
+
+
+struct ServiceInfo;
+
 
 QT_BEGIN_NAMESPACE
 
@@ -23,11 +29,22 @@ public:
 private:
     Ui::ServiceWidget* ui;
 
+    ConfigManager* m_config;
+
+    QList<ServiceInfo> m_services;
+
     // 初始化UI内容
     void initUi() const;
 
+    // 读取配置获取数据
+    void loadServices();
+
     // 设置table的数据
     void setTableData() const;
+
+    // 轮询查询状态
+    void pollServiceStatus(const ServiceInfo&service, DWORD targetState,
+        const QString&successMsg, const QString&failureMsg);
 
 private slots:
     void on_btn_auto_start_clicked();
@@ -36,7 +53,7 @@ private slots:
 
     // table相关槽
 
-    void on_tb_services_customContextMenuRequested(const QPoint &pos) const;
+    void on_tb_services_customContextMenuRequested(const QPoint&pos);
 };
 
 

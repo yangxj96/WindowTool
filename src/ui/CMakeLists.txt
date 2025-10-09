@@ -22,4 +22,5 @@ target_link_libraries(ui
         Qt6::Widgets
         Qt6::Gui
         Qt6::Network
+        helper
 )
