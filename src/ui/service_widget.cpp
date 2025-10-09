@@ -13,6 +13,10 @@
 ServiceWidget::ServiceWidget(QWidget* parent) : QWidget(parent), ui(new Ui::ServiceWidget), m_config(&ConfigManager::instance()) {
     ui->setupUi(this);
 
+    // 创建共享轮询定时器
+    m_queue_timer = new QTimer(this);
+    connect(m_queue_timer, &QTimer::timeout, this, &ServiceWidget::onPollTimerTick);
+
     // 初始化UI
     this->initUi();
     // 填充数据
@@ -43,27 +47,6 @@ void ServiceWidget::loadServices() {
     this->setTableData();
 }
 
-// void ServiceWidget::readData() const {
-//     auto&config = ConfigManager::instance();
-//
-//     // @formatter:off
-//     QJsonArray services;
-//     services.append(ServiceInfo("RICS"   ,"DmServiceDMSERVER",true).toJsonObject());
-//     services.append(ServiceInfo("SPECTRA","DmServiceDMSERVER",true).toJsonObject());
-//     services.append(ServiceInfo("DMAP"   ,"DmAPService"      ,true).toJsonObject());
-//     services.append(ServiceInfo("Redis"  ,"Redis"            ,true).toJsonObject());
-//     services.append(ServiceInfo("MySQL"  ,"MySQL"            ,false).toJsonObject());
-//     services.append(ServiceInfo("PGSQL"  ,"PostgreSQL"       ,false).toJsonObject());
-//     services.append(ServiceInfo("INODE"  ,"INODE_SVR_SERVICE",false).toJsonObject());
-//     config.set("services",services);
-//     // @formatter:on
-//
-//     for (auto services = config.get<QJsonArray>("services"); const auto&service: services) {
-//         auto [display_name, service_name, unify] = ServiceInfo::fromJsonObject(service.toObject());
-//         qDebug() << "显示名称:" << display_name << ";服务名称:" << service_name << ";统一启动" << unify;
-//     }
-// }
-
 void ServiceWidget::setTableData() const {
     // 先根据数据设置行数
     ui->tb_services->setRowCount(m_services.size());
@@ -87,49 +70,175 @@ void ServiceWidget::setTableData() const {
 }
 
 void ServiceWidget::pollServiceStatus(const ServiceInfo&service, DWORD targetState,
-    const QString&successMsg, const QString&failureMsg) {
-
+                                      const QString&successMsg, const QString&failureMsg) {
+    // 👉 立即禁用 UI（只在首次进入时执行）
     ui->tb_services->setEnabled(false);
     ui->btn_auto_start->setEnabled(false);
     ui->btn_auto_stop->setEnabled(false);
 
-    // 使用单次定时器实现轮询
-    QTimer::singleShot(1000, [this, service, targetState, successMsg, failureMsg]() mutable {
-        if (SERVICE_STATUS status; ServiceHelper::query(service.service_name, status)) {
+    // 使用递归 lambda
+    std::function<void()> poll = [this, service, targetState, successMsg, failureMsg, &poll]() {
+        SERVICE_STATUS status;
+        if (ServiceHelper::query(service.service_name, status)) {
             if (status.dwCurrentState == targetState) {
-                // ✅ 目标状态达成
                 // QMessageBox::information(nullptr, "成功", service.display_name + " " + successMsg);
-                loadServices(); // 最终刷新 UI
-                return;
+                loadServices();
             }
-
-            if (status.dwCurrentState == SERVICE_STOPPED || status.dwCurrentState == SERVICE_RUNNING) {
-                // ❌ 进入了非目标的终态（比如启动失败自动停止）
+            else if (status.dwCurrentState == SERVICE_STOPPED ||
+                     status.dwCurrentState == SERVICE_RUNNING) {
                 QMessageBox::warning(nullptr, "状态异常", service.display_name + " 未达到预期状态");
                 loadServices();
+            }
+            else {
+                // 继续轮询
+                QTimer::singleShot(1000, poll);
                 return;
             }
 
-            // ❓ 仍在过渡状态（如 START_PENDING），继续轮询
-            pollServiceStatus(service, targetState, successMsg, failureMsg);
+            // 👉 无论成功或失败，最终恢复 UI
+            ui->tb_services->setEnabled(true);
+            ui->btn_auto_start->setEnabled(true);
+            ui->btn_auto_stop->setEnabled(true);
         }
         else {
-            // 查询失败，可能服务已不存在或权限问题
-            QMessageBox::warning(nullptr, "查询失败", "无法获取服务状态，停止轮询");
+            QMessageBox::warning(nullptr, "查询失败", "无法获取服务状态");
             loadServices();
+
+            // 恢复 UI
+            ui->tb_services->setEnabled(true);
+            ui->btn_auto_start->setEnabled(true);
+            ui->btn_auto_stop->setEnabled(true);
         }
+    };
+
+    // 开始第一次轮询
+    QTimer::singleShot(1000, poll);
+}
+
+void ServiceWidget::startServiceQueue() {
+    if (m_queue_is_processing || m_queue_services.isEmpty()) {
+        return;
+    }
+
+    m_queue_is_processing = true;
+
+    m_queue_total = m_queue_services.size();
+    m_queue_current_idx = 0;
+
+    emit processingStarted();
+    emit progressUpdated(m_queue_current_idx, m_queue_total, "准备中...");
+
+    // 禁用 UI
+    ui->tb_services->setEnabled(false);
+    ui->btn_auto_start->setEnabled(false);
+    ui->btn_auto_stop->setEnabled(false);
+
+    processNextInQueue();
+}
+
+void ServiceWidget::processNextInQueue() {
+    // 为空则说明队列没了,全都执行完成了
+    if (m_queue_services.isEmpty()) {
+        // 发送槽信号
+        emit processingFinished();
+        // 最终刷新
+        loadServices();
+        m_queue_is_processing = false;
+
+        // 恢复 UI
         ui->tb_services->setEnabled(true);
         ui->btn_auto_start->setEnabled(true);
         ui->btn_auto_stop->setEnabled(true);
-    });
+        return;
+    }
+
+    const auto [service, targetState, actionName] = m_queue_services.takeFirst();
+
+    m_queue_current_idx++;
+    m_queue_current_service = service;
+    m_queue_current_target_state = targetState;
+    m_queue_current_action_name = actionName;
+
+    emit progressUpdated(m_queue_current_idx, m_queue_total, m_queue_current_service.display_name);
+
+    qDebug() << "开始" << m_queue_current_action_name << "服务:" << service.display_name;
+
+    // 发送控制命令
+    bool started = false;
+    if (targetState == SERVICE_RUNNING) {
+        started = ServiceHelper::start(service.service_name);
+    }
+    else {
+        started = ServiceHelper::stop(service.service_name);
+    }
+
+    if (!started) {
+        QMessageBox::warning(this, "失败", service.display_name + " " + m_queue_current_action_name + "失败（发送命令失败）");
+        processNextInQueue(); // 继续下一个
+        return;
+    }
+
+    // 开始轮询该服务的状态
+    m_queue_timer->start(1000); // 每秒查询一次
+}
+
+void ServiceWidget::onPollTimerTick() {
+    SERVICE_STATUS status;
+    if (!ServiceHelper::query(m_queue_current_service.service_name, status)) {
+        QMessageBox::warning(this, "查询失败", "无法获取服务状态: " + m_queue_current_service.display_name);
+        m_queue_timer->stop();
+        processNextInQueue(); // 进入下一个任务
+        return;
+    }
+
+    if (status.dwCurrentState == m_queue_current_target_state) {
+        // ✅ 成功
+        qDebug() << m_queue_current_service.display_name << "已进入目标状态";
+        m_queue_timer->stop();
+        processNextInQueue(); // 成功，继续下一个
+        return;
+    }
+
+    if (status.dwCurrentState == SERVICE_RUNNING || status.dwCurrentState == SERVICE_STOPPED) {
+        // ❌ 已进入终态，但不是目标状态（如启动失败自动停止）
+        QMessageBox::warning(this, "状态异常", m_queue_current_service.display_name + " 未达到预期状态");
+        m_queue_timer->stop();
+        processNextInQueue();
+    }
 }
 
 void ServiceWidget::on_btn_auto_start_clicked() {
-    QMessageBox::information(this, "提示", "一键启动被点击");
+    m_queue_services.clear();
+    m_queue_current_idx = 0;
+    for (const auto&service: m_services) {
+        if (!service.unify) continue;
+        if (SERVICE_STATUS status; ServiceHelper::query(service.service_name, status)) {
+            if (status.dwCurrentState != SERVICE_RUNNING) {
+                m_queue_services.append({service,SERVICE_RUNNING, "启动"});
+            }
+        }
+    }
+    if (m_queue_services.isEmpty()) {
+        QMessageBox::information(this, "提示", "所有统一服务已在运行");
+        return;
+    }
+    startServiceQueue();
 }
 
 void ServiceWidget::on_btn_auto_stop_clicked() {
-    QMessageBox::information(this, "提示", "一键停止被点击");
+    m_queue_services.clear();
+    for (const auto&service: m_services) {
+        if (SERVICE_STATUS status; ServiceHelper::query(service.service_name, status)) {
+            if (status.dwCurrentState != SERVICE_STOPPED) {
+                m_queue_services.append({service,SERVICE_STOPPED, "停止"});
+            }
+        }
+    }
+    if (m_queue_services.isEmpty()) {
+        QMessageBox::information(this, "提示", "所有统一服务已在停止");
+        return;
+    }
+    startServiceQueue();
 }
 
 void ServiceWidget::on_tb_services_customContextMenuRequested(const QPoint&pos) {

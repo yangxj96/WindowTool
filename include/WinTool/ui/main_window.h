@@ -1,6 +1,7 @@
 #ifndef WINTOOL_MAIN_WINDOW_H
 #define WINTOOL_MAIN_WINDOW_H
 
+#include <QLabel>
 #include <QMainWindow>
 
 #include "service_widget.h"
@@ -27,6 +28,14 @@ private:
 
     ServiceWidget* widget_service;
     JdksWidget* widget_jdks;
+
+    QLabel m_statusRightLabel;
+
+    void onServiceProgressUpdated(int current, int total, const QString&serviceName) const;
+
+    void onServiceProcessingStarted() const;
+
+    void onServiceProcessingFinished() const;
 };
 
 

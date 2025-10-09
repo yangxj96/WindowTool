@@ -1,0 +1,20 @@
+// void ServiceWidget::readData() const {
+//     auto&config = ConfigManager::instance();
+//
+//     // @formatter:off
+//     QJsonArray services;
+//     services.append(ServiceInfo("RICS"   ,"DmServiceDMSERVER",true).toJsonObject());
+//     services.append(ServiceInfo("SPECTRA","DmServiceDMSERVER",true).toJsonObject());
+//     services.append(ServiceInfo("DMAP"   ,"DmAPService"      ,true).toJsonObject());
+//     services.append(ServiceInfo("Redis"  ,"Redis"            ,true).toJsonObject());
+//     services.append(ServiceInfo("MySQL"  ,"MySQL"            ,false).toJsonObject());
+//     services.append(ServiceInfo("PGSQL"  ,"PostgreSQL"       ,false).toJsonObject());
+//     services.append(ServiceInfo("INODE"  ,"INODE_SVR_SERVICE",false).toJsonObject());
+//     config.set("services",services);
+//     // @formatter:on
+//
+//     for (auto services = config.get<QJsonArray>("services"); const auto&service: services) {
+//         auto [display_name, service_name, unify] = ServiceInfo::fromJsonObject(service.toObject());
+//         qDebug() << "显示名称:" << display_name << ";服务名称:" << service_name << ";统一启动" << unify;
+//     }
+// }
