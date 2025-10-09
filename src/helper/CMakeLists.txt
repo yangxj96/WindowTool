@@ -5,6 +5,9 @@ add_library(helper SHARED
         # 服务相关处理
         ../../include/WinTool/helper/service_helper.h
         service_helper.cpp
+        # navicat无限试用
+        ../../include/WinTool/helper/navicat_cleanup.h
+        navicat_cleanup.cpp
 )
 
 target_include_directories(helper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)

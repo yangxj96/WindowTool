@@ -24,6 +24,9 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )
 
+# 可选：启用 Unicode
+add_compile_definitions(UNICODE _UNICODE)
+
 # 处理 Windows 平台特定的 DLL 复制
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 
@@ -65,15 +68,15 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:helper> "$<TARGET_FILE_DIR:WinTool>/"
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ui> "$<TARGET_FILE_DIR:WinTool>/")
 
-#    add_custom_command(TARGET WinTool POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E copy
-#            $<TARGET_FILE:helper>
-#            "$<TARGET_FILE_DIR:WinTool>/")
-#
-#    add_custom_command(TARGET WinTool POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E copy
-#            $<TARGET_FILE:ui>
-#            "$<TARGET_FILE_DIR:WinTool>/")
+    #    add_custom_command(TARGET WinTool POST_BUILD
+    #            COMMAND ${CMAKE_COMMAND} -E copy
+    #            $<TARGET_FILE:helper>
+    #            "$<TARGET_FILE_DIR:WinTool>/")
+    #
+    #    add_custom_command(TARGET WinTool POST_BUILD
+    #            COMMAND ${CMAKE_COMMAND} -E copy
+    #            $<TARGET_FILE:ui>
+    #            "$<TARGET_FILE_DIR:WinTool>/")
 
 endif ()
 
