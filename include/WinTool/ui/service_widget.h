@@ -79,16 +79,15 @@ private:
     // 设置table的数据
     void setTableData() const;
 
-    // 轮询查询状态
-    void pollServiceStatus(const ServiceInfo&service, DWORD targetState,
-        const QString&successMsg, const QString&failureMsg);
-
+    // 启动服务队列
     void startServiceQueue();
 
+    // 队列进入下一个
     void processNextInQueue();
 
 private slots:
 
+    // 定时任务
     void onPollTimerTick();
 
     void on_btn_auto_start_clicked();

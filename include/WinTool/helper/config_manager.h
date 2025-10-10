@@ -92,17 +92,17 @@ private:
     // 保存QJsonObject对象
     bool save(const QJsonObject&obj) const;
 
-    // 解析路径,支持.和[index]
-    static QStringList parsePath(const QString&keyPath);
-
     // 获取配置文件路径
     QString configFilePath() const;
+
+    // 解析路径,支持.和[index]
+    static QStringList parsePath(const QString&keyPath);
 
     // 根据路径获取QJsonValue(核心)
     static QJsonValue getValue(const QJsonObject&root, const QString&keyPath);
 
     // 根据路径设置QJsonValue(核心)
-    static QJsonObject setValue(QJsonObject root, const QString&keyPath, const QJsonValue&value);
+    static QJsonObject setValue(const QJsonObject&root, const QString&keyPath, const QJsonValue&value);
 
     // setValue用到的递归
     static QJsonObject setValueRecursive(QJsonObject obj, const QStringList&parts, int index, const QJsonValue&value);

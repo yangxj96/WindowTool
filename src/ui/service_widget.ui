@@ -30,26 +30,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="btn_checked_start">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>选中启动</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QPushButton" name="btn_checked_stop">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>选中停止</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0" colspan="4">
       <widget class="QTableWidget" name="tb_services">
        <property name="contextMenuPolicy">
@@ -68,6 +48,26 @@
        <column/>
        <column/>
        <column/>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QPushButton" name="btn_checked_stop">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>选中停止</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="btn_checked_start">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>选中启动</string>
+       </property>
       </widget>
      </item>
     </layout>

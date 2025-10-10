@@ -10,7 +10,11 @@
 #include "WinTool/helper/service_helper.h"
 #include "WinTool/helper/config_manager.h"
 
-ServiceWidget::ServiceWidget(QWidget* parent) : QWidget(parent), ui(new Ui::ServiceWidget), m_config(&ConfigManager::instance()) {
+ServiceWidget::ServiceWidget(QWidget* parent)
+    : QWidget(parent),
+      ui(new Ui::ServiceWidget),
+      m_config(&ConfigManager::instance()) {
+
     ui->setupUi(this);
 
     // 创建共享轮询定时器
@@ -19,9 +23,6 @@ ServiceWidget::ServiceWidget(QWidget* parent) : QWidget(parent), ui(new Ui::Serv
 
     // 初始化UI
     this->initUi();
-    // 填充数据
-    // this->setTableData();
-
     // 读取配置后填充数据
     this->loadServices();
 }
@@ -67,52 +68,6 @@ void ServiceWidget::setTableData() const {
     // 自动调整列宽
     ui->tb_services->resizeColumnsToContents();
     ui->tb_services->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-}
-
-void ServiceWidget::pollServiceStatus(const ServiceInfo&service, DWORD targetState,
-                                      const QString&successMsg, const QString&failureMsg) {
-    // 👉 立即禁用 UI（只在首次进入时执行）
-    ui->tb_services->setEnabled(false);
-    ui->btn_auto_start->setEnabled(false);
-    ui->btn_auto_stop->setEnabled(false);
-
-    // 使用递归 lambda
-    std::function<void()> poll = [this, service, targetState, successMsg, failureMsg, &poll]() {
-        SERVICE_STATUS status;
-        if (ServiceHelper::query(service.service_name, status)) {
-            if (status.dwCurrentState == targetState) {
-                // QMessageBox::information(nullptr, "成功", service.display_name + " " + successMsg);
-                loadServices();
-            }
-            else if (status.dwCurrentState == SERVICE_STOPPED ||
-                     status.dwCurrentState == SERVICE_RUNNING) {
-                QMessageBox::warning(nullptr, "状态异常", service.display_name + " 未达到预期状态");
-                loadServices();
-            }
-            else {
-                // 继续轮询
-                QTimer::singleShot(1000, poll);
-                return;
-            }
-
-            // 👉 无论成功或失败，最终恢复 UI
-            ui->tb_services->setEnabled(true);
-            ui->btn_auto_start->setEnabled(true);
-            ui->btn_auto_stop->setEnabled(true);
-        }
-        else {
-            QMessageBox::warning(nullptr, "查询失败", "无法获取服务状态");
-            loadServices();
-
-            // 恢复 UI
-            ui->tb_services->setEnabled(true);
-            ui->btn_auto_start->setEnabled(true);
-            ui->btn_auto_stop->setEnabled(true);
-        }
-    };
-
-    // 开始第一次轮询
-    QTimer::singleShot(1000, poll);
 }
 
 void ServiceWidget::startServiceQueue() {
@@ -269,15 +224,9 @@ void ServiceWidget::on_tb_services_customContextMenuRequested(const QPoint&pos) 
             return;
         }
 
-        if (ServiceHelper::start(service.service_name)) {
-            QMessageBox::information(nullptr, "提示", "已发送启动请求");
-
-            // 开始轮询状态
-            pollServiceStatus(service, SERVICE_RUNNING, "启动成功", "启动失败");
-        }
-        else {
-            QMessageBox::critical(nullptr, "错误", "启动服务失败，请检查权限或服务配置");
-        }
+        m_queue_services.clear();
+        m_queue_services.append({service,SERVICE_RUNNING, "启动"});
+        startServiceQueue();
     });
 
     menu.addAction("停止服务", [this,row] {
@@ -300,15 +249,9 @@ void ServiceWidget::on_tb_services_customContextMenuRequested(const QPoint&pos) 
             return;
         }
 
-        if (ServiceHelper::stop(service.service_name)) {
-            QMessageBox::information(nullptr, "提示", "已发送停止请求");
-
-            // 开始轮询状态
-            pollServiceStatus(service, SERVICE_STOPPED, "停止成功", "停止失败");
-        }
-        else {
-            QMessageBox::critical(nullptr, "错误", "停止服务失败，请检查权限或服务是否可停止");
-        }
+        m_queue_services.clear();
+        m_queue_services.append({service,SERVICE_STOPPED, "停止"});
+        startServiceQueue();
     });
 
     // ✅ 推荐：菜单出现在鼠标右下方，不遮挡

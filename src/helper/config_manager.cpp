@@ -5,11 +5,8 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QTextStream>
-#include <QVariant>
 #include <QDebug>
 #include <QJsonArray>
-#include <QVariant>
-#include <memory>
 
 ConfigManager& ConfigManager::instance() {
     static ConfigManager instance;
@@ -32,7 +29,8 @@ ConfigManager::ConfigManager() {
 
 ConfigManager::~ConfigManager() {
     if (m_dirty) {
-        save(m_cache);
+        (void)save(m_cache);
+        qDebug() << "保存缓存内容成功";
     }
 }
 
@@ -92,22 +90,22 @@ bool ConfigManager::save(const QJsonObject&obj) const {
     return true;
 }
 
-QStringList ConfigManager::parsePath(const QString&keyPath) {
-    // 简化版：目前只支持 . 分隔和 [n] 数组访问
-    // 示例：users.0.name → ["users", "0", "name"]
-    // 更复杂可用正则，这里手动处理
-    QStringList result;
-    QString temp = keyPath;
-    temp.replace("[", ".").replace("]", "");
-    return temp.split('.', Qt::SkipEmptyParts);
-}
-
 QString ConfigManager::configFilePath() const {
     if (m_configPath.isEmpty()) {
         auto const exeDir = QCoreApplication::applicationDirPath();
         m_configPath = exeDir + "/config.json";
     }
     return m_configPath;
+}
+
+QStringList ConfigManager::parsePath(const QString&keyPath) {
+    // 简化版：目前只支持 . 分隔和 [n] 数组访问
+    // 示例：users.0.name → ["users", "0", "name"]
+    // 更复杂可用正则，这里手动处理
+    // QStringList result;
+    QString temp = keyPath;
+    temp.replace("[", ".").replace("]", "");
+    return temp.split('.', Qt::SkipEmptyParts);
 }
 
 QJsonValue ConfigManager::getValue(const QJsonObject&root, const QString&keyPath) {
@@ -120,24 +118,25 @@ QJsonValue ConfigManager::getValue(const QJsonObject&root, const QString&keyPath
         }
         else if (value.isArray()) {
             bool ok = false;
-            int index = part.toInt(&ok);
-            if (ok && index >= 0 && index < value.toArray().size()) {
+            if (const int index = part.toInt(&ok); ok && index >= 0 && index < value.toArray().size()) {
                 value = value.toArray().at(index);
             }
             else {
-                return QJsonValue(); // 索引越界或无效
+                // 索引越界或无效
+                return {};
             }
         }
         else {
-            return QJsonValue(); // 类型不匹配
+            // 类型不匹配
+            return {};
         }
     }
 
     return value.isUndefined() ? QJsonValue() : value;
 }
 
-QJsonObject ConfigManager::setValue(QJsonObject root, const QString&keyPath, const QJsonValue&value) {
-    QStringList parts = parsePath(keyPath);
+QJsonObject ConfigManager::setValue(const QJsonObject&root, const QString&keyPath, const QJsonValue&value) {
+    const QStringList parts = parsePath(keyPath);
     return setValueRecursive(root, parts, 0, value);
 }
 
@@ -147,13 +146,15 @@ QJsonObject ConfigManager::setValueRecursive(QJsonObject obj, const QStringList&
     }
 
     const QString&part = parts[index];
-    const bool isLast = (index == parts.size() - 1);
+    const bool isLast = index == parts.size() - 1;
 
     // 处理数组
     if (part.contains('[')) {
-        QString baseName = part.mid(0, part.indexOf('['));
+        const QString baseName = part.mid(0, part.indexOf('['));
         bool ok = false;
-        int arrayIndex = part.mid(part.indexOf('[') + 1, part.indexOf(']') - part.indexOf('[') - 1).toInt(&ok);
+        const int arrayIndex = part
+                .mid(part.indexOf('[') + 1, part.indexOf(']') - part.indexOf('[') - 1)
+                .toInt(&ok);
         if (!ok) return obj;
 
         QJsonArray arr;
@@ -174,7 +175,7 @@ QJsonObject ConfigManager::setValueRecursive(QJsonObject obj, const QStringList&
             if (arrayIndex < arr.size() && arr[arrayIndex].isObject()) {
                 child = arr[arrayIndex].toObject();
             }
-            QJsonObject newChild = setValueRecursive(child, parts, index + 1, value);
+            const QJsonObject newChild = setValueRecursive(child, parts, index + 1, value);
             arr[arrayIndex] = newChild;
         }
 
@@ -195,7 +196,7 @@ QJsonObject ConfigManager::setValueRecursive(QJsonObject obj, const QStringList&
         if (obj[part].isObject()) {
             child = obj[part].toObject();
         }
-        QJsonObject newChild = setValueRecursive(child, parts, index + 1, value);
+        const QJsonObject newChild = setValueRecursive(child, parts, index + 1, value);
         obj[part] = newChild;
     }
 
