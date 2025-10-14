@@ -37,8 +37,13 @@ public:
 
     ~ServiceWidget() override;
 
+protected:
+    void showEvent(QShowEvent* event) override;
+
 private:
     Ui::ServiceWidget* ui;
+
+    bool m_loaded = false;
 
     ConfigManager* m_config;
 

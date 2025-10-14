@@ -4,6 +4,7 @@
 #include <QWidget>
 
 
+class ConfigManager;
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
@@ -20,8 +21,25 @@ public:
 
     ~JdksWidget() override;
 
+protected:
+    void showEvent(QShowEvent* event) override;
+
 private:
     Ui::JdksWidget* ui;
+
+    bool m_loaded = false;
+
+    ConfigManager* m_config;
+
+    // JDK前缀
+    QString jdks_prefix;
+
+    // 设置table的数据
+    void setTableData() const;
+
+private slots:
+
+    void on_btn_jdk_prefix_pick_clicked();
 };
 
 

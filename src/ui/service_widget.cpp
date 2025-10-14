@@ -10,24 +10,29 @@
 #include "WinTool/helper/service_helper.h"
 #include "WinTool/helper/config_manager.h"
 
-ServiceWidget::ServiceWidget(QWidget* parent)
-    : QWidget(parent),
-      ui(new Ui::ServiceWidget),
-      m_config(&ConfigManager::instance()) {
+ServiceWidget::ServiceWidget(QWidget* parent) : QWidget(parent), ui(new Ui::ServiceWidget), m_config(&ConfigManager::instance()) {
     ui->setupUi(this);
-
-    // 创建共享轮询定时器
-    m_queue_timer = new QTimer(this);
-    connect(m_queue_timer, &QTimer::timeout, this, &ServiceWidget::onPollTimerTick);
 
     // 初始化UI
     this->initUi();
-    // 读取配置后填充数据
-    this->loadServices();
 }
 
 ServiceWidget::~ServiceWidget() {
     delete ui;
+}
+
+void ServiceWidget::showEvent(QShowEvent* event) {
+    if (!m_loaded) {
+        // 创建共享轮询定时器
+        m_queue_timer = new QTimer(this);
+        connect(m_queue_timer, &QTimer::timeout, this, &ServiceWidget::onPollTimerTick);
+
+        // 读取配置后填充数据
+        this->loadServices();
+
+        m_loaded = true;
+    }
+    QWidget::showEvent(event);
 }
 
 void ServiceWidget::initUi() const {
