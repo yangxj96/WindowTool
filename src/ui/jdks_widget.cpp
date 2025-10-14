@@ -31,7 +31,7 @@ void JdksWidget::showEvent(QShowEvent* event) {
 
 void JdksWidget::setTableData() const {
     if (jdks_prefix.trimmed().isEmpty()) {
-        qDebug() << "前缀为空，跳过扫描：" << jdks_prefix;
+        qWarning() << "前缀为空，跳过扫描：" << jdks_prefix;
         return;
     }
 
