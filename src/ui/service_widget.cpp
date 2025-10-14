@@ -14,7 +14,6 @@ ServiceWidget::ServiceWidget(QWidget* parent)
     : QWidget(parent),
       ui(new Ui::ServiceWidget),
       m_config(&ConfigManager::instance()) {
-
     ui->setupUi(this);
 
     // 创建共享轮询定时器
@@ -194,6 +193,10 @@ void ServiceWidget::on_btn_auto_stop_clicked() {
         return;
     }
     startServiceQueue();
+}
+
+void ServiceWidget::on_btn_service_add_clicked() {
+    QMessageBox::information(nullptr, "提示", "服务新增被单击");
 }
 
 void ServiceWidget::on_tb_services_customContextMenuRequested(const QPoint&pos) {

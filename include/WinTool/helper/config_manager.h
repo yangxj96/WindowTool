@@ -74,6 +74,9 @@ public:
     // 获取原始QJsonObject(只读快照)
     QJsonObject toObject() const;
 
+    // 添加服务
+    bool addService(const QString& displayName, const QString& serviceName, bool unify);
+
 private:
     // 缓存当前配置(避免频繁磁盘读取)
     mutable QJsonObject m_cache;

@@ -54,7 +54,7 @@ private:
     // 任务队列
     QList<ServiceTask> m_queue_services;
     // 当前队列总数
-    int m_queue_total = 0;
+    qsizetype m_queue_total = 0;
     // 当前队列第几个
     int m_queue_current_idx = 0;
     // 当前队列处理的服务
@@ -93,6 +93,8 @@ private slots:
     void on_btn_auto_start_clicked();
 
     void on_btn_auto_stop_clicked();
+
+    void on_btn_service_add_clicked();
 
     // table相关槽
 

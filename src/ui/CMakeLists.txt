@@ -11,6 +11,7 @@ add_library(ui SHARED
         ../../include/WinTool/ui/jdks_widget.h
         jdks_widget.cpp
         jdks_widget.ui
+        # 服务编辑
 )
 
 target_include_directories(ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)

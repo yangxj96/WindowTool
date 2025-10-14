@@ -21,6 +21,20 @@ QJsonObject ConfigManager::toObject() const {
     return m_cache;
 }
 
+bool ConfigManager::addService(const QString&displayName, const QString&serviceName, const bool unify) {
+    // 获取现有的 services 数组
+    auto services = get<QJsonArray>("services", QJsonArray());
+    // 构造新的服务项
+    QJsonObject newService;
+    newService["display_name"] = displayName;
+    newService["service_name"] = serviceName;
+    newService["unify"] = unify;
+    // 添加到数组末尾
+    services.append(newService);
+    // 设置回去
+    return set("services", services);
+}
+
 /***************************** 私有方法区 *****************************/
 
 ConfigManager::ConfigManager() {
