@@ -3,33 +3,48 @@
 
 #include <QString>
 #include <vector>
+#include <functional>
 
-// 前向声明 Windows HKEY
-enum class RegRoot;
 
 class NavicatCleanup {
 public:
-    NavicatCleanup() = default;
-    ~NavicatCleanup() = default;
+    // 定义日志回调类型，便于外部处理日志信息
+    using LogCallback = std::function<void(const QString&)>;
+    using ErrorCallback = std::function<void(const QString&)>;
 
-    NavicatCleanup(const NavicatCleanup&) = delete;
-    NavicatCleanup& operator=(const NavicatCleanup&) = delete;
+    // 构造函数，可设置日志回调
+    explicit NavicatCleanup(
+        LogCallback logCallback = nullptr,
+        ErrorCallback errorCallback = nullptr
+    );
 
-    NavicatCleanup(NavicatCleanup&&) = default;
-    NavicatCleanup& operator=(NavicatCleanup&&) = default;
-
-    /**
-     * @brief 执行完整的 Navicat 注册表清理
-     */
-    static void cleanup();
+    // 执行完整的注册表清理逻辑
+    void cleanup() const;
 
 private:
-    // 工具函数（使用 QString 与 Qt 交互，内部转为 std::wstring）
-    static void deleteRegistryKey(RegRoot root, const QString& subKey);
+    // 执行命令并捕获输出，失败时抛出异常
+    static QString runCommandAndCaptureOutput(const QString& program, const QStringList& arguments);
 
-    static std::vector<QString> listRegistrySubKeys(RegRoot root, const QString& path);
+    // 静默执行命令（不捕获输出）
+    static void runSilentCommand(const QString& program, const QStringList& arguments);
 
-    static bool registryKeyContainsString(RegRoot root, const QString& keyPath, const QString& searchTerm);
+    // 列出指定注册表路径下的所有子项
+    static std::vector<QString> listRegistryKeys(const QString& path);
+
+    // 检查注册表项是否包含某个字符串
+    static bool registryKeyContains(const QString& key, const QString& term);
+
+    // 日志回调函数
+    LogCallback m_logCallback;
+
+    // 错误回调函数
+    ErrorCallback m_errorCallback;
+
+    // 内部日志处理
+    void log(const QString& message) const;
+
+    // 内部错误处理
+    void error(const QString& message) const;
 };
 
 

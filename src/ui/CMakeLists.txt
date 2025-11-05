@@ -1,4 +1,4 @@
-add_library(ui SHARED
+add_library(WtUi SHARED
         # 主页
         ../../include/WinTool/ui/main_window.h
         main_window.cpp
@@ -14,14 +14,14 @@ add_library(ui SHARED
         # 服务编辑
 )
 
-target_include_directories(ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
+target_include_directories(WtUi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 
 # 如果 core 模块依赖 Qt 或其他库
-target_link_libraries(ui
+target_link_libraries(WtUi
         PRIVATE
         Qt6::Core
         Qt6::Widgets
         Qt6::Gui
         Qt6::Network
-        helper
+        WtHelper
 )

@@ -3,8 +3,17 @@
 
 #include <QLabel>
 
+// #include "WinTool/helper/navicat_cleanup.h"
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+
+    // 尝试清理,测试可行
+    // NavicatCleanup cleanup(
+    //     [](const QString&msg) { qDebug() << "[清理日志]" << msg; },
+    //     [](const QString&err) { qWarning() << "[清理错误]" << err; }
+    // );
+    // cleanup.cleanup();
 
     // // 创建一个用于显示消息的 QLabel
     // m_statusRightLabel = new QLabel("就绪");
@@ -22,9 +31,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tw->addTab(widget_jdks, tr("JDK管理"));
 
     // 👉 连接进度信号
-    connect(widget_service, &ServiceWidget::progressUpdated   ,this, &MainWindow::onServiceProgressUpdated);
-    connect(widget_service, &ServiceWidget::processingStarted ,this, &MainWindow::onServiceProcessingStarted);
-    connect(widget_service, &ServiceWidget::processingFinished,this, &MainWindow::onServiceProcessingFinished);
+    connect(widget_service, &ServiceWidget::progressUpdated, this, &MainWindow::onServiceProgressUpdated);
+    connect(widget_service, &ServiceWidget::processingStarted, this, &MainWindow::onServiceProcessingStarted);
+    connect(widget_service, &ServiceWidget::processingFinished, this, &MainWindow::onServiceProcessingFinished);
 }
 
 MainWindow::~MainWindow() {

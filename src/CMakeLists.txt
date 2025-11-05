@@ -4,7 +4,7 @@ add_subdirectory(ui)
 # 不加 WIN32
 add_executable(WinTool main.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../resources/application.rc)
 
-set(PROJECT_MODULES helper ui)
+set(PROJECT_MODULES WtHelper WtUi)
 
 # 在 Release 中隐藏控制台
 if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
@@ -65,8 +65,8 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 
     # 复制自定义模块 DLL
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:helper> "$<TARGET_FILE_DIR:WinTool>/"
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ui> "$<TARGET_FILE_DIR:WinTool>/")
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:WtHelper> "$<TARGET_FILE_DIR:WinTool>/"
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:WtUi> "$<TARGET_FILE_DIR:WinTool>/")
 
     #    add_custom_command(TARGET WinTool POST_BUILD
     #            COMMAND ${CMAKE_COMMAND} -E copy

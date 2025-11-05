@@ -1,4 +1,4 @@
-add_library(helper SHARED
+add_library(WtHelper SHARED
         # 配置管理
         ../../include/WinTool/helper/config_manager.h
         config_manager.cpp
@@ -10,10 +10,10 @@ add_library(helper SHARED
         navicat_cleanup.cpp
 )
 
-target_include_directories(helper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
+target_include_directories(WtHelper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 
 # 如果 core 模块依赖 Qt 或其他库
-target_link_libraries(helper
+target_link_libraries(WtHelper
         PRIVATE
         Qt6::Core
         # 服务管理
