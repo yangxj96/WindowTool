@@ -3,18 +3,35 @@
 #include <QProcess>
 #include <QStringList>
 #include <QDebug>
+#include <stdexcept>
+#include <string>
 
-NavicatCleanup::NavicatCleanup(LogCallback logCallback, ErrorCallback errorCallback)
-    : m_logCallback(std::move(logCallback)),
-      m_errorCallback(std::move(errorCallback)) {
+
+NavicatCleanup::NavicatCleanup() {
 }
 
-void NavicatCleanup::cleanup() const {
-    log("⏳ 正在执行Navicat注册表清理...");
+// 执行清理并返回结果（true表示成功，false表示失败）
+bool NavicatCleanup::cleanup() {
+    qDebug().noquote() << "正在执行Navicat注册表清理...";
 
-    // 注册表删除操作封装
-    auto regDelete = [](const QString&path) {
-        runSilentCommand("reg", {"delete", path, "/f"});
+    bool isSuccess = true;
+    QString errorDetails;
+
+    // 注册表删除操作
+    auto regDelete = [&](const QString&path) {
+        QProcess process;
+        process.start("reg", {"delete", path, "/f"});
+        if (!process.waitForFinished(3000)) {
+            isSuccess = false;
+            errorDetails += QString("删除注册表项 %1 超时: %2\n")
+                    .arg(path)
+                    .arg(process.errorString());
+            qWarning().noquote() << errorDetails.trimmed();
+        }
+        else if (process.exitCode() != 0) {
+            // 非0退出码但可能是正常情况（项不存在），仅记录不标记失败
+            qDebug().noquote() << "注册表项不存在或已删除:" << path;
+        }
     };
 
     // 删除已知的Navicat注册表项
@@ -26,60 +43,73 @@ void NavicatCleanup::cleanup() const {
     const std::vector<QString> searchTerms = {"Info", "ShellFolder"};
 
     try {
-        for (const std::vector<QString> clsidKeys = listRegistryKeys(clsidPath); const QString&key: clsidKeys) {
+        std::vector<QString> clsidKeys = listRegistryKeys(clsidPath);
+        qDebug().noquote() << "找到" << clsidKeys.size() << "个CLSID子项，开始检查...";
+
+        for (const QString&key: clsidKeys) {
             for (const QString&term: searchTerms) {
                 if (registryKeyContains(key, term)) {
                     regDelete(key);
-                    log(QString("已删除注册表项: %1").arg(key));
+                    qDebug().noquote() << "已删除注册表项:" << key;
                 }
             }
         }
     }
-    catch (const QString&e) {
-        error("❌ 读取注册表键失败: " + e);
+    catch (const std::exception&e) {
+        isSuccess = false;
+        errorDetails += "读取注册表键失败: " + QString::fromLocal8Bit(e.what()) + "\n";
+        qWarning().noquote() << errorDetails.trimmed();
     }
 
-    log("✅ 完成注册表清理");
+    if (isSuccess) {
+        qDebug().noquote() << "注册表清理完成";
+    }
+    else {
+        qWarning().noquote() << "注册表清理完成但存在错误";
+    }
+
+    return isSuccess;
 }
 
 QString NavicatCleanup::runCommandAndCaptureOutput(const QString&program, const QStringList&arguments) {
     QProcess process;
     process.start(program, arguments);
 
-    // 等待命令执行完成（超时设为5秒）
     if (!process.waitForFinished(5000)) {
-        // 抛出std::runtime_error，错误信息从QString转换为UTF-8字符串
+        // 错误信息编码转换：GBK → UTF-8
+        QByteArray errorBytes = process.errorString().toLocal8Bit(); // 获取本地编码（GBK）
+        QString errorStr = QString::fromLocal8Bit(errorBytes); // 转换为UTF-8
         throw std::runtime_error(
-            QString("命令执行超时或失败: %1").arg(process.errorString()).toUtf8().constData()
+            QString("命令执行超时或失败: %1").arg(errorStr).toUtf8().constData()
         );
     }
 
-    // 检查命令退出码
     if (process.exitCode() != 0) {
+        // 读取命令的标准错误输出（reg命令的错误信息是GBK编码）
+        QByteArray errOutput = process.readAllStandardError();
+        QString errStr = QString::fromLocal8Bit(errOutput); // 强制用本地编码（GBK）解析
         throw std::runtime_error(
-            QString("命令执行失败 (Exit Code: %1)").arg(process.exitCode()).toUtf8().constData()
+            QString("命令执行失败 (Exit Code: %1): %2")
+                .arg(process.exitCode())
+                .arg(errStr)
+                .toUtf8()
+                .constData()
         );
     }
 
-    // 返回标准输出（转换为UTF-8字符串）
-    return QString::fromUtf8(process.readAllStandardOutput());
-}
-
-void NavicatCleanup::runSilentCommand(const QString&program, const QStringList&arguments) {
-    QProcess process;
-    process.start(program, arguments);
-    // 静默执行无需捕获输出，等待完成即可（超时设为3秒）
-    process.waitForFinished(3000);
+    // 注册表内容输出同样用GBK解析
+    QByteArray outputBytes = process.readAllStandardOutput();
+    return QString::fromLocal8Bit(outputBytes);
 }
 
 std::vector<QString> NavicatCleanup::listRegistryKeys(const QString&path) {
-    const QString output = runCommandAndCaptureOutput("reg", {"query", path});
+    QString output = runCommandAndCaptureOutput("reg", {"query", path});
     std::vector<QString> keys;
 
-    // 按行分割输出并过滤有效的注册表项
-    for (QStringList lines = output.split('\n', Qt::SkipEmptyParts); const QString&line: lines) {
-        // 注册表项以"HKEY_"开头
-        if (QString trimmedLine = line.trimmed(); trimmedLine.startsWith("HKEY_")) {
+    QStringList lines = output.split('\n', Qt::SkipEmptyParts);
+    for (const QString&line: lines) {
+        QString trimmedLine = line.trimmed();
+        if (trimmedLine.startsWith("HKEY_")) {
             keys.push_back(trimmedLine);
         }
     }
@@ -89,32 +119,11 @@ std::vector<QString> NavicatCleanup::listRegistryKeys(const QString&path) {
 
 bool NavicatCleanup::registryKeyContains(const QString&key, const QString&term) {
     try {
-        // 搜索注册表项及其子项中包含的关键词
-        const QString output = runCommandAndCaptureOutput("reg", {"query", key, "/s", "/f", term});
+        QString output = runCommandAndCaptureOutput("reg", {"query", key, "/s", "/f", term});
         return output.contains(term, Qt::CaseInsensitive);
     }
-    catch (const QString&) {
-        // 命令执行失败（如项不存在）视为不包含
+    catch (const std::exception&e) {
+        qWarning().noquote() << "检查注册表项" << key << "时出错:" << e.what();
         return false;
-    }
-}
-
-void NavicatCleanup::log(const QString&message) const {
-    if (m_logCallback) {
-        m_logCallback(message);
-    }
-    else {
-        // 默认输出到调试控制台
-        qDebug().noquote() << message;
-    }
-}
-
-void NavicatCleanup::error(const QString&message) const {
-    if (m_errorCallback) {
-        m_errorCallback(message);
-    }
-    else {
-        // 默认输出到警告控制台
-        qWarning().noquote() << message;
     }
 }

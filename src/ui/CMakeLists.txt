@@ -11,7 +11,10 @@ add_library(WtUi SHARED
         ../../include/WinTool/ui/jdks_widget.h
         jdks_widget.cpp
         jdks_widget.ui
-        # 服务编辑
+        # 杂项
+        ../../include/WinTool/ui/misc.h
+        misc.cpp
+        misc.ui
 )
 
 target_include_directories(WtUi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)

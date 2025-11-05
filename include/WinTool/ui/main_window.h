@@ -6,6 +6,7 @@
 
 #include "service_widget.h"
 #include "jdks_widget.h"
+#include "misc.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -28,6 +29,7 @@ private:
 
     ServiceWidget* widget_service;
     JdksWidget* widget_jdks;
+    Misc* widget_misc;
 
     QLabel m_statusRightLabel;
 

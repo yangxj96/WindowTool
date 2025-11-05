@@ -7,7 +7,7 @@
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
-    QApplication::setStyle("Windows");
+    QApplication::setStyle("Fusion");
     MainWindow mw;
     mw.show();
     qDebug() << "包含主题:" << QStyleFactory::keys();
